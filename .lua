@@ -7,7 +7,7 @@ local window = library:New({
     Size = UDim2.new(0, 490, 0, 450)
 });
 local flags = library.Flags
-local watermark = library:Watermark({Name = "im tried bro, Enabled = true, Position = UDim2.new(0, 0, 0, 0), Color = Color3.fromRGB(255, 255, 255)});
+local watermark = library:Watermark({Name = "zorski & josh triggerbot", Enabled = true, Position = UDim2.new(0, 0, 0, 0), Color = Color3.fromRGB(255, 255, 255)});
 
 window:Seperator({Name = "josh's triggerbot wip"})
 
@@ -23,11 +23,6 @@ fovSection:Colorpicker({Name = "FOV Color", Flag = "fov_color", Default = Color3
 fovSection:Toggle({Name = "Visualize FOV", Flag = "fov_vis", Default = true});
 fovSection:Slider({Name = "FOV Radius", Flag = "fov_radius", Default = 10, Minimum = 5, Maximum = 100, Decimals = 1, Ending = "px"});
 fovSection:Slider({Name = "FOV Transparency", Flag = "fov_transparency", Default = 0, Minimum = 0, Maximum = 1, Decimals = 0.01, Ending = "%"});
-
--- Keybind for UI Toggle
-
--- You can also add additional code here to hide the UI on startup if needed
-window.Visible = true  -- Make sure the window is visible when the script starts, or set it to false for hidden by default
 
 
 -- Services
