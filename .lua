@@ -16,7 +16,7 @@ local triggerbotSection = ui.tabs["legit"]:Section({Name = "Triggerbot", Side = 
 
 local main_toggle = triggerbotSection:Toggle({Name = "Enabled", Flag = "tb_enabled"});
 triggerbotSection:Keybind({Flag = "tb_keybind", Name = "toggle", Default = Enum.KeyCode.T, Mode = "Toggle"});
-triggerbotSection:Slider({Name = "Delay", Flag = "tb_delay", Default = 1, Minimum = 1, Maximum = 300, Decimals = 1, Ending = "ms"});
+triggerbotSection:Slider({Name = "Delay", Flag = "tb_delay", Default = 80, Minimum = 66, Maximum = 300, Decimals = 1, Ending = "ms"});
 --fov
 local fovSection = ui.tabs["legit"]:Section({Name = "Field of View", Side = "Right", Size = 170});
 fovSection:Colorpicker({Name = "FOV Color", Flag = "fov_color", Default = Color3.new(0, 1, 0)}); -- Note: Color3 values are 0-1
@@ -199,7 +199,17 @@ UserInputService.InputEnded:Connect(function(input, gameProcessed)
     end
 end)
 
--- Main loop
+-- Services
+local VirtualUser = game:GetService("VirtualUser")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+-- Local variables
+local lastClickTime = 0
+local delayInSeconds = flags.tb_delay / 1000  -- Convert ms to seconds
+local isMouseDown = false
+
+-- Main triggerbot loop
 RunService.RenderStepped:Connect(function()
     -- Update FOV circle
     UpdateFOVCircle()
@@ -207,17 +217,30 @@ RunService.RenderStepped:Connect(function()
     -- Only run if triggerbot is enabled and keybind is not toggled
     if flags.tb_enabled and not flags.tb_keybind then
         local currentTime = tick()
-        local delayInSeconds = flags.tb_delay / 1000 -- Convert ms to seconds
-        
-        -- Check if we can shoot based on delay and if mouse is not already down
-        if currentTime - lastShotTime >= delayInSeconds and not isMouseDown then
+
+        -- Check if the delay time has passed and ensure mouse is not down already
+        if currentTime - lastClickTime >= delayInSeconds and not isMouseDown then
             local playersInFOV = GetPlayersInFOV()
             local targetPlayer = GetClosestPlayer(playersInFOV)
-            
+
             if targetPlayer then
-                DebugLog("Firing at: " .. targetPlayer.Name)
-                lastShotTime = currentTime
-                SimulateMouseClick()
+                -- Get mouse position from UserInputService
+                local mousePos = UserInputService:GetMouseLocation()
+
+                -- Try to simulate the mouse click
+                local success, err = pcall(function()
+                    -- Simulate mouse button down and up at the mouse position
+                    VirtualUser:Button1Down(mousePos)
+                    task.wait(0.05)  -- Small delay between button down and up
+                    VirtualUser:Button1Up(mousePos)
+                end)
+
+                if success then
+                    lastClickTime = currentTime
+                    DebugLog("Firing at: " .. targetPlayer.Name)
+                else
+                    warn("Error during click simulation:", err)
+                end
             end
         end
     end
